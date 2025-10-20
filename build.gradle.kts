@@ -1,9 +1,10 @@
 plugins {
-    kotlin("jvm") version "2.2.20"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.shadow)
 }
 
 group = "cz.jeme.cqd"
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -26,5 +27,15 @@ tasks {
         manifest {
             attributes["Main-Class"] = "cz.jeme.cqd.MainKt"
         }
+    }
+
+    shadowJar {
+        enableAutoRelocation = true
+        relocationPrefix = "cz.jeme.cqd.shaded"
+        archiveClassifier = ""
+    }
+    
+    assemble {
+        dependsOn(shadowJar)
     }
 }
