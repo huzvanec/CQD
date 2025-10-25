@@ -1,7 +1,15 @@
 [versions]
 kotlin = "2.2.21"
 shadow = "9.2.2"
+ffmpeg = "7.1.1-1.5.12"
+javacv = "1.5.12"
+jline = "3.30.0"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+
+[libraries]
+ffmpeg = { group = "org.bytedeco", name = "ffmpeg-platform", version.ref = "ffmpeg" }
+javacv = { group = "org.bytedeco", name = "javacv", version.ref = "javacv" }
+jline = { group = "org.jline", name = "jline", version.ref = "jline" }

@@ -1,6 +1,11 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.shadow)
+    application
+}
+
+application {
+    mainClass = "cz.jeme.cqd.MainKt"
 }
 
 group = "cz.jeme.cqd"
@@ -12,6 +17,9 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+    implementation(libs.ffmpeg)
+    implementation(libs.javacv)
+    implementation(libs.jline)
 }
 
 kotlin {
@@ -25,17 +33,7 @@ tasks {
 
     jar {
         manifest {
-            attributes["Main-Class"] = "cz.jeme.cqd.MainKt"
+            attributes["Main-Class"] = application.mainClass
         }
-    }
-
-    shadowJar {
-        enableAutoRelocation = true
-        relocationPrefix = "cz.jeme.cqd.shaded"
-        archiveClassifier = ""
-    }
-    
-    assemble {
-        dependsOn(shadowJar)
     }
 }
