@@ -14,8 +14,12 @@ Terminal video player written in Kotlin.
 ### Run
 
 ```shell
-$ java -jar ./CQD-VERSION.jar /path/to/video.mp4
+java -jar ./CQD-VERSION.jar /path/to/video.mp4
+```
 
+---
+
+```
 Reading file...
 Play video file? (Y/n): Y
 ```
@@ -30,6 +34,8 @@ Play video file? (Y/n): Y
 ### Build
 
 ```shell
+git clone https://github.com/huzvanec/CQD.git
+cd CQD
 ./gradlew build
 ```
 
