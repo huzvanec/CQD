@@ -1,12 +1,15 @@
 # CQD
 
-Terminal video player
+Terminal video player written in Kotlin.
+
+![showcase](https://github.com/user-attachments/assets/517eb1e1-1dfc-4e4f-890d-3647694cb4d5)
 
 ## Usage
 
 ### Requirements
 
 - [JRE 21](https://adoptium.net/temurin/releases/?version=21)
+- Terminal with truecolor support
 
 ### Run
 
@@ -22,7 +25,7 @@ Play video file? (Y/n): Y
 ### Requirements
 
 - [Git](https://git-scm.com/install/)
-- [JDK 17](https://adoptium.net/temurin/releases/?version=17)
+- [JDK 21](https://adoptium.net/temurin/releases/?version=17)
 
 ### Build
 
