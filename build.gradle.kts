@@ -31,6 +31,14 @@ tasks {
         useJUnitPlatform()
     }
 
+    build {
+        dependsOn(shadowJar)
+    }
+    
+    shadowJar {
+        archiveClassifier = ""
+    }
+
     jar {
         manifest {
             attributes["Main-Class"] = application.mainClass

@@ -28,16 +28,15 @@ lateinit var terminal: Terminal
 var initialAttributes: Attributes? = null
 val reader: LineReader by lazy { LineReaderBuilder.builder().terminal(terminal).build() }
 
-fun main() {
+fun main(args: Array<String>) {
     terminal = TerminalBuilder.builder().system(true).build()
 
     // Disable FFmpeg logging
     FFmpegLogCallback.setLevel(avutil.AV_LOG_QUIET)
 
     try {
-        terminal.puts(InfoCmp.Capability.exit_ca_mode)
         terminal.puts(InfoCmp.Capability.cursor_visible)
-        run()
+        run(args)
     } finally {
         terminal.puts(InfoCmp.Capability.exit_ca_mode)
         terminal.puts(InfoCmp.Capability.cursor_visible)
@@ -51,8 +50,20 @@ private const val CHAR_ASPECT_RATIO: Double = 1.0 / 2.0 // chars are approx twic
 private const val MAX_FPS: Double = 25.0
 
 @OptIn(ExperimentalAtomicApi::class)
-fun run() {
-    val input = readInputPath()
+fun run(args: Array<String>) {
+    val input = when {
+        args.isNotEmpty() -> {
+            val f = File(args[0])
+            if (!validateInputFile(f)) return
+            f
+        }
+
+        else -> askForInputFile()
+    }
+
+    val colors = System.getenv("COLORTERM")?.lowercase()
+    val trueColor = colors == "truecolor" || colors == "24bit"
+    if (!trueColor) println("This terminal environment does not support truecolor!\nYour experience will be very limited.")
 
     print("Play video file? (Y/n): ")
     val key = terminal.reader().read().toChar()
@@ -300,36 +311,40 @@ fun run() {
     }
 }
 
-fun readInputPath(): File {
+private fun validateInputFile(file: File): Boolean {
+    if (!file.exists()) {
+        terminal.puts(InfoCmp.Capability.bell)
+        println("File does not exist")
+        return false
+    }
+    if (!file.isFile) {
+        terminal.puts(InfoCmp.Capability.bell)
+        println("Not a file")
+        return false
+    }
+    if (!file.canRead()) {
+        terminal.puts(InfoCmp.Capability.bell)
+        println("File unreadable")
+        return false
+    }
+    println("Reading file...")
+    try {
+        FFmpegFrameGrabber(file).use { grabber ->
+            grabber.start()
+            grabber.stop()
+        }
+    } catch (_: Exception) {
+        terminal.puts(InfoCmp.Capability.bell)
+        println("Invalid file format (not a video file)")
+        return false
+    }
+    return true
+}
+
+fun askForInputFile(): File {
     while (true) {
         val path = reader.readLine("video path> ")
         val file = File(path)
-        if (!file.exists()) {
-            terminal.puts(InfoCmp.Capability.bell)
-            println("File does not exist")
-            continue
-        }
-        if (!file.isFile) {
-            terminal.puts(InfoCmp.Capability.bell)
-            println("Not a file")
-            continue
-        }
-        if (!file.canRead()) {
-            terminal.puts(InfoCmp.Capability.bell)
-            println("File unreadable")
-            continue
-        }
-        println("Reading file...")
-        try {
-            FFmpegFrameGrabber(file).use { grabber ->
-                grabber.start()
-                grabber.stop()
-            }
-        } catch (_: Exception) {
-            terminal.puts(InfoCmp.Capability.bell)
-            println("Invalid file format (not a video file)")
-            continue
-        }
-        return file
+        if (validateInputFile(file)) return file
     }
 }
