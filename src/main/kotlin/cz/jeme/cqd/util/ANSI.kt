@@ -26,7 +26,7 @@ object ANSI {
     }
 
     val FG_RESET = "\u001B[39m"
-    
+
     val FG_RED = fgRgb(255, 0, 0)
     val FG_GREEN = fgRgb(0, 255, 0)
     val FG_YELLOW = fgRgb(255, 255, 0)
@@ -44,6 +44,13 @@ object ANSI {
             .append(b).append('m')
         return sb.toString()
     }
+
+    /**
+     * https://www.itu.int/rec/R-REC-BT.601
+     */
+    fun lumaFromRgb(r: Int, g: Int, b: Int): Double = 0.299 * r + 0.587 * g + 0.114 * b
+
+    fun normLumaFromRgb(r: Int, g: Int, b: Int): Double = lumaFromRgb(r, g, b) / 255.0
     
-    val BG_RESET = "\u001B[49m"
+    const val BG_RESET = "\u001B[49m"
 }

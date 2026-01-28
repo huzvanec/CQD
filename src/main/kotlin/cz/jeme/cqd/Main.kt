@@ -1,5 +1,7 @@
 package cz.jeme.cqd
 
+import cz.jeme.cqd.renderer.CharRenderer
+import cz.jeme.cqd.renderer.CharRendererRegistry
 import cz.jeme.cqd.util.ANSI
 import org.bytedeco.ffmpeg.global.avutil
 import org.bytedeco.javacv.FFmpegFrameGrabber
@@ -33,6 +35,8 @@ fun main() {
     FFmpegLogCallback.setLevel(avutil.AV_LOG_QUIET)
 
     try {
+        terminal.puts(InfoCmp.Capability.exit_ca_mode)
+        terminal.puts(InfoCmp.Capability.cursor_visible)
         run()
     } finally {
         terminal.puts(InfoCmp.Capability.exit_ca_mode)
@@ -43,9 +47,6 @@ fun main() {
     }
 }
 
-private const val CHARS_ANSI =
-    " ´`.·-¯¨¸',_¬:ºª°;~\"!¡=¹^+¦÷×²³>l<r|L?¿/\\TFJv(*iz±íIfìjt«)»[]cY47xu}1kîy{ïnZsÍoÌCÝ2eEúVù6Ï5h3¤Þçý9aÎPXSüóAò£UµûÿédÈÉèKñHbqÇöOõpàôá#Gëw¼mÁÊD¢ÀðËÚêÙg©¾M¥½âäþßãæøR®Ä0ÃÓ"
-private const val CHARS_CLEAN = $$" ._-:!?71iIca234db56O089$W%#@Ñ"
 private const val CHAR_ASPECT_RATIO: Double = 1.0 / 2.0 // chars are approx twice as high as wide
 private const val MAX_FPS: Double = 25.0
 
@@ -128,7 +129,7 @@ fun run() {
             grabber.audioChannels
         ).apply { start() }
 
-        var renderMode: RenderMode = RenderMode.BUCKET_STAR
+        var renderer: CharRenderer = CharRendererRegistry.PIXELATED_STAR_ADAPTIVE_DYNAMIC
 
         val running = AtomicBoolean(true)
 
@@ -138,7 +139,7 @@ fun run() {
                 val ch = reader.read().toChar()
                 when (ch) {
                     'q', 'Q' -> running.store(false)
-                    'h', 'H' -> {
+                    'f', 'F' -> {
                         // toggle info bars
                         infoBarsEnabled = !infoBarsEnabled
                         // and update video dimensions
@@ -146,8 +147,9 @@ fun run() {
                     }
 
                     'r', 'R' -> {
-                        val modes = RenderMode.entries
-                        renderMode = modes[(renderMode.ordinal + 1) % modes.size]
+                        val renderers = CharRendererRegistry.renderers
+                        val index = renderers.indexOf(renderer)
+                        renderer = renderers[(index + 1) % renderers.size]
                     }
                 }
             }
@@ -247,7 +249,7 @@ fun run() {
 
                     frameBuilder.append('\n')
                 }
-                
+
                 frameBuilder.append(ANSI.FG_BLACK)
 
                 // take only the first video buffer, planar formats are unsupported
@@ -260,27 +262,8 @@ fun run() {
                         val blue = videoBuf.get().toInt() and 0xFF
                         val green = videoBuf.get().toInt() and 0xFF
                         val red = videoBuf.get().toInt() and 0xFF
-                        when (renderMode) {
-                            RenderMode.ASCII, RenderMode.ASCII_CLEAN -> {
-                                val lightness = 0.299 * red + 0.587 * green + 0.114 * blue
-                                val normLightness = lightness / 255.0
-                                val chars: String = if (renderMode == RenderMode.ASCII_CLEAN) CHARS_CLEAN else CHARS_ANSI
-                                val char = chars[(normLightness * (chars.length - 1)).toInt()]
-                                frameBuilder.append(ANSI.fgRgb(red, green, blue)).append(char)
-                            }
 
-                            RenderMode.STRIPES -> {
-                                frameBuilder.append(ANSI.fgRgb(red, green, blue)).append('■')
-                            }
-
-                            RenderMode.BUCKET -> {
-                                frameBuilder.append(ANSI.bgRgb(red, green, blue)).append(' ')
-                            }
-
-                            RenderMode.BUCKET_STAR -> {
-                                frameBuilder.append(ANSI.bgRgb(red, green, blue)).append('*')
-                            }
-                        }
+                        renderer.render(frameBuilder, red, green, blue)
                     }
                     videoBuf.position(videoBuf.position() + stridePadding)
                     frameBuilder.append('\n')
@@ -300,8 +283,8 @@ fun run() {
                         .append(String.format(frameNumberFmt, frameNum))
                         .append(" | ")
                         .append(String.format("%05.2f", progress * 100.0))
-                        .append(" % | render mode: ")
-                        .append(renderMode.name)
+                        .append(" % | renderer: ")
+                        .append(renderer.name)
                 }
 
                 val frameStr = frameBuilder.toString()
