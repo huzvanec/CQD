@@ -1,6 +1,9 @@
 # CQD
 
-Terminal video player written in Kotlin.
+Epic terminal video player written in Kotlin.
+
+[VLC](https://www.videolan.org/vlc/) is a thing of the past! Watch movies directly in your terminal as nature
+intended.
 
 ![showcase](https://github.com/user-attachments/assets/517eb1e1-1dfc-4e4f-890d-3647694cb4d5)
 
