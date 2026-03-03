@@ -3,7 +3,7 @@ kotlin = "2.3.10"
 shadow = "9.3.2"
 ffmpeg = "7.1-1.5.11"
 javacv = "1.5.13"
-jline = "3.30.7"
+jline = "4.0.0"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
