@@ -37,6 +37,9 @@ tasks {
     
     shadowJar {
         archiveClassifier = ""
+        
+        // https://github.com/GradleUp/shadow/issues/713#issuecomment-1381749858
+        dependsOn(distTar, distZip)
     }
 
     jar {
