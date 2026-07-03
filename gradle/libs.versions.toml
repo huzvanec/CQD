@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.4.0"
-shadow = "9.4.2"
+shadow = "9.4.3"
 ffmpeg = "8.0.1-1.5.13"
 javacv = "1.5.13"
 jline = "4.1.3"
