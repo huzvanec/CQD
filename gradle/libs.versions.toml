@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 shadow = "9.6.1"
 ffmpeg = "8.1.2-1.5.14"
 javacv = "1.5.14"
